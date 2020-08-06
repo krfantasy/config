@@ -128,6 +128,7 @@ Do this after `q` in Debugger buffer."
 
 ;;; Scheme
 (add-to-list 'auto-mode-alist '("\\.sls\\'" . scheme-mode))
+(add-to-list 'auto-mode-alist '("\\.sps\\'" . scheme-mode))
 (load-file "~/Source/geiser/elisp/geiser.el")
 
 (add-to-list 'auto-mode-alist '("\\.rkt\\'" . racket-mode))
@@ -138,7 +139,7 @@ Do this after `q` in Debugger buffer."
             (setq tab-always-indent 'complete)
 	    (remove-hook 'pre-redisplay-functions
 			 #'racket-xp-pre-redisplay
-			 t))
+			 t)))
 
 ;;; smartparens
 (require 'smartparens-config)
@@ -337,20 +338,87 @@ Do this after `q` in Debugger buffer."
 (setq browse-url-browser-function 'eww-browse-url)
 
 ;;; Gnus
-(setq user-mail-address "jay.xu.krfantasy@gmail.com"
-      user-full-name "Jay Xu")
+;; (setq user-mail-address "jay.xu.krfantasy@gmail.com"
+;;       user-full-name "Jay Xu")
 
-(setq gnus-select-method
-      '(nnimap "GMail"
-               (nnimap-address "imap.gmail.com")
-               (nnimap-server-port "imaps")
-               (nnimp-stream ssl)))
+;; (setq gnus-select-method
+;;       '(nnimap "GMail"
+;;                (nnimap-address "imap.gmail.com")
+;;                (nnimap-server-port "imaps")
+;;                (nnimp-stream ssl)))
 
-(setq smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587
-      gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]\")\"]\\)")
+;; (setq smtpmail-smtp-server "smtp.gmail.com"
+;;       smtpmail-smtp-service 587
+;;       gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\"]\"[#'()]")
 
 ;(add-to-list 'gnus-secondary-select-methods '(nntp "nntp.aioe.org"))
+
+
+;;; Mu4e
+;; the exact path may differ --- check it
+(add-to-list 'load-path "/usr/local/share/emacs/site-lisp/mu4e")
+(require 'mu4e)
+
+;; use mu4e for e-mail in emacs
+(setq mail-user-agent 'mu4e-user-agent)
+
+(setq mu4e-drafts-folder "/[Gmail].Drafts")
+(setq mu4e-sent-folder   "/[Gmail].Sent Mail")
+(setq mu4e-trash-folder  "/[Gmail].Trash")
+
+;; don't save message to Sent Messages, Gmail/IMAP takes care of this
+(setq mu4e-sent-messages-behavior 'delete)
+
+;; (See the documentation for `mu4e-sent-messages-behavior' if you have
+;; additional non-Gmail addresses and want assign them different
+;; behavior.)
+
+;; setup some handy shortcuts
+;; you can quickly switch to your Inbox -- press ``ji''
+;; then, when you want archive some messages, move them to
+;; the 'All Mail' folder by pressing ``ma''.
+
+(setq mu4e-maildir-shortcuts
+    '( (:maildir "/INBOX"              :key ?i)
+       (:maildir "/[Gmail].Sent Mail"  :key ?s)
+       (:maildir "/[Gmail].Trash"      :key ?t)
+       (:maildir "/[Gmail].All Mail"   :key ?a)))
+
+;; allow for updating mail using 'U' in the main view:
+(setq mu4e-get-mail-command "offlineimap")
+
+;; something about ourselves
+(setq
+   user-mail-address "jay.xu.krfantasy@gmail.com"
+   user-full-name  "Jay Xu"
+   mu4e-compose-signature
+    (concat
+      "Sincerely,\n"
+      "Jay Xu"))
+
+;; sending mail -- replace USERNAME with your gmail username
+;; also, make sure the gnutls command line utils are installed
+;; package 'gnutls-bin' in Debian/Ubuntu
+
+(require 'smtpmail)
+(setq message-send-mail-function 'smtpmail-send-it
+   starttls-use-gnutls t
+   smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+   smtpmail-auth-credentials
+     '(("smtp.gmail.com" 587 "jay.xu.krfantasy@gmail.com" nil))
+   smtpmail-default-smtp-server "smtp.gmail.com"
+   smtpmail-smtp-server "smtp.gmail.com"
+   smtpmail-smtp-service 587
+
+   ;; if you need offline mode, set these -- and create the queue dir
+   ;; with 'mu mkdir', i.e.. mu mkdir /home/user/Maildir/queue
+   smtpmail-queue-mail nil
+   smtpmail-queue-dir "~/Maildir/queue/cur")
+
+;; automatically update every 10 minutes
+(setq mu4e-update-interval 600)
+(setq message-kill-buffer-on-exit t)
+
 
 ;;; Font
 (add-to-list 'default-frame-alist '(font . "Monaco 10"))
@@ -480,7 +548,7 @@ Do this after `q` in Debugger buffer."
  '(nyan-animate-nyancat t)
  '(nyan-mode t)
  '(nyan-wavy-trail t)
- '(org-agenda-files (quote ("~/work.org")))
+ '(org-agenda-files (quote ("~/project.org")))
  '(org-clock-idle-time 15)
  '(org-html-htmlize-output-type (quote css))
  '(package-selected-packages
@@ -489,6 +557,7 @@ Do this after `q` in Debugger buffer."
  '(pdf-view-midnight-colors (quote ("#DCDCCC" . "#383838")))
  '(pos-tip-background-color "#2e2e2d")
  '(pos-tip-foreground-color "#989790")
+ '(send-mail-function (quote smtpmail-send-it))
  '(show-paren-mode t)
  '(smartrep-mode-line-active-bg (solarized-color-blend "#8ac6f2" "#2e2e2d" 0.2))
  '(tabbar-background-color nil)
@@ -521,6 +590,7 @@ Do this after `q` in Debugger buffer."
  '(weechat-color-list
    (quote
     (unspecified "#292928" "#2e2e2d" "#4f4240" "#ffb4ac" "#3d454b" "#8ac6f2" "#4b4436" "#e5c06d" "#404249" "#a4b5e6" "#4c3935" "#e5786d" "#3a463b" "#7ec98f" "#8c8a85" "#73726e")))
+ '(woman-fill-column 80)
  '(xterm-color-names
    ["#2e2e2d" "#ffb4ac" "#8ac6f2" "#e5c06d" "#a4b5e6" "#e5786d" "#7ec98f" "#e7e4da"])
  '(xterm-color-names-bright
